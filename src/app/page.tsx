@@ -1,103 +1,94 @@
-import Image from "next/image";
+import { ProductGrid } from '@/components/ProductGrid';
+import { BannerCarousel } from '@/components/BannerCarousel';
+import { ProductCarousel } from '@/components/ProductCarousel';
+import { PromoBanner } from '@/components/PromoBanner';
+import { Button } from '@/components/ui/button';
 
-export default function Home() {
+export default async function Home() {
+
+  const apiData = await fetch('http://34.207.78.115')
+  const {data} = await apiData.json()
+  const slides = data.slides
+  const latest_products = data.latest_products
+  const top_rated_products = data.top_rated_products
+  const best_sellers = data.best_sellers
+  const infoBoxes = data.info_boxes
+
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen pb-8 px-4" >
+      {/* Banner Carrossel */}
+      <section className="">
+        <BannerCarousel slides={slides} />
+      </section>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      <PromoBanner  infoBoxes={infoBoxes} />
+
+      {/* Search and Filter Section
+      <section className="py-8 bg-white">
+        <div className="container mx-auto px-4">
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </section> */}
+
+      {/* Display Filtered Products or Default Sections */}
+        {/* <section id="filtered-products" className="py-16 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">
+              Resultados da Busca
+            </h2>
+              <ProductGrid products={filteredProducts} />
+            ) : (
+              <p className="text-center text-gray-600 text-lg">Nenhum produto encontrado.</p>
+          </div>
+        </section>
+      ) : ( */
+      }
+        <section id="default-sections" className="py-16 bg-white">
+
+
+          {/* Carrossel de Perfumaria */}
+            <ProductCarousel 
+              products={latest_products} 
+              title="Perfumaria" 
+              itemsPerView={4}
+              backgroundColor="white"
+            />
+          
+
+          {/* Carrossel de Suplementos */}
+            <ProductCarousel 
+              products={top_rated_products} 
+              title="Suplementos Alimentares" 
+              itemsPerView={4}
+              backgroundColor="gray"
+            />
+
+          {/* Carrossel de Bem Estar */}
+            <ProductCarousel 
+              products={best_sellers} 
+              title="Bem Estar Ozonizada" 
+              itemsPerView={4}
+              backgroundColor="white"
+            />
+          
+
+          {/* Carrossel de Produtos Capilares */}
+            <ProductCarousel 
+              products={top_rated_products} 
+              title="Capilar Ozonizada" 
+              itemsPerView={4}
+              backgroundColor="gray"
+            />
+
+          {/* Carrossel de Acessórios */}
+            <ProductCarousel 
+              products={top_rated_products} 
+              title="Acessórios" 
+              itemsPerView={4}
+              backgroundColor="white"
+            />
+
+        </section>
     </div>
   );
 }
