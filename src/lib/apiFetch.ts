@@ -33,7 +33,6 @@ class ApiFetch {
       ...restOptions,
     };
 
-    // Adicionar cache do Next.js se especificado
     if (revalidate !== undefined) {
       (fetchOptions as any).next = { revalidate };
     }
@@ -51,21 +50,18 @@ class ApiFetch {
     return response.json();
   }
 
-  // GET com cache opcional
   async get<T>(endpoint: string, revalidate?: number): Promise<T> {
     const options: FetchOptions = { method: 'GET' };
     
     if (revalidate !== undefined) {
       options.revalidate = revalidate;
     } else {
-      // Se não passar revalidate, não cacheia (sempre fresh)
       options.cache = 'no-store';
     }
     
     return this.request<T>(endpoint, options);
   }
 
-  // POST (sempre sem cache)
   async post<T>(endpoint: string, data?: any): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'POST',
@@ -74,7 +70,6 @@ class ApiFetch {
     });
   }
 
-  // PUT (sempre sem cache)
   async put<T>(endpoint: string, data?: any): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
