@@ -4,8 +4,9 @@ import ProductLanding from '@/components/ProductLanding';
 import { ProductGrid } from '@/components/ProductGrid';
 import { notFound } from 'next/navigation';
 import { api } from '@/lib/api';
-import { getProductBySlug } from '@/services/product/productService';
+import { getProductBySlug, getProductsByCategory } from '@/services/product/productService';
 import axios from 'axios';
+import { ProductCarousel } from '@/components/ProductCarousel';
 
 interface ProductPageProps {
   params: Promise<{
@@ -18,6 +19,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const productSlug = resolvedParams.slug;
   const productResponse = await getProductBySlug(productSlug);  
   const product = productResponse.data;
+  const relatioendProducts = await getProductsByCategory(product.category.slug);
+
+
 
 
 
@@ -28,12 +32,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <ProductLanding product={product} />
       <div className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">
-            Outros Produtos
-          </h2>
-          <React.Suspense fallback={<div>Loading...</div>}>
-            <ProductGrid categorySlug={product.category.slug} />
-          </React.Suspense>
+            <ProductCarousel title="Produtos Relacionados" products={relatioendProducts.products} />
+          {/* <ProductGrid products={relatioendProducts} /> */}
         </div>
       </div>
     </div>

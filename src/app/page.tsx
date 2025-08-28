@@ -3,26 +3,42 @@ import { BannerCarousel } from '@/components/BannerCarousel';
 import { ProductCarousel } from '@/components/ProductCarousel';
 import { PromoBanner } from '@/components/PromoBanner';
 import { Button } from '@/components/ui/button';
+import { api } from '@/lib/api';
+import { getAllCategories } from '@/services/category/categoryService';
 
 export default async function Home() {
 
-  const apiData = await fetch('http://34.207.78.115')
-  const {data} = await apiData.json()
-  const slides = data.slides
-  const latest_products = data.latest_products
-  const top_rated_products = data.top_rated_products
-  const best_sellers = data.best_sellers
-  const infoBoxes = data.info_boxes
+  const apiData = await api.get('/')
+  const {data} = apiData.data
+  const categories = await getAllCategories();
 
 
   return (
     <div className="min-h-screen pb-8 px-4" >
       {/* Banner Carrossel */}
       <section className="">
-        <BannerCarousel slides={slides} />
+        <BannerCarousel slides={data.slides} />
       </section>
 
-      <PromoBanner  infoBoxes={infoBoxes} />
+      <PromoBanner  infoBoxes={data.info_boxes} />
+
+
+      <div>
+        <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+          Categorias
+        </h2>
+        <div className="flex flex-wrap justify-center gap-2 mb-8">
+          {categories.map((category) => (
+            <Button
+              key={category.id}
+              variant="outline"
+              className="rounded-full"
+            >
+              {category.name}
+            </Button>
+          ))}
+        </div>
+      </div>
 
       {/* Search and Filter Section
       <section className="py-8 bg-white">
@@ -48,7 +64,7 @@ export default async function Home() {
 
           {/* Carrossel de Perfumaria */}
             <ProductCarousel 
-              products={latest_products} 
+              products={data.latest_products} 
               title="Perfumaria" 
               itemsPerView={4}
               backgroundColor="white"
@@ -57,7 +73,7 @@ export default async function Home() {
 
           {/* Carrossel de Suplementos */}
             <ProductCarousel 
-              products={top_rated_products} 
+              products={data.top_rated_products} 
               title="Suplementos Alimentares" 
               itemsPerView={4}
               backgroundColor="gray"
@@ -65,7 +81,7 @@ export default async function Home() {
 
           {/* Carrossel de Bem Estar */}
             <ProductCarousel 
-              products={best_sellers} 
+              products={data.best_sellers} 
               title="Bem Estar Ozonizada" 
               itemsPerView={4}
               backgroundColor="white"
@@ -74,7 +90,7 @@ export default async function Home() {
 
           {/* Carrossel de Produtos Capilares */}
             <ProductCarousel 
-              products={top_rated_products} 
+              products={data.top_rated_products}
               title="Capilar Ozonizada" 
               itemsPerView={4}
               backgroundColor="gray"
@@ -82,7 +98,7 @@ export default async function Home() {
 
           {/* Carrossel de Acessórios */}
             <ProductCarousel 
-              products={top_rated_products} 
+              products={data.top_rated_products} 
               title="Acessórios" 
               itemsPerView={4}
               backgroundColor="white"
