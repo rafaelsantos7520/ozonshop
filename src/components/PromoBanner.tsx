@@ -9,6 +9,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
+import Autoplay from 'embla-carousel-autoplay';
 
 interface PromoItem {
   id: string;
@@ -56,6 +57,7 @@ export function PromoBanner({ infoBoxes }: PromoBannerProps) {
               align: 'start',
               loop: true,
             }}
+            plugins={[Autoplay({ delay: 4000, stopOnInteraction: false })]}
             className="w-full">
             <CarouselContent>
               {infoBoxes.map((item) => (
