@@ -6,12 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Menu, X, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useSearch } from '@/context/SearchContext';
+import { useAuth } from '@/context/AuthContext';
 import SearchBar from './SearchBar';
 import { useState } from 'react';
 
 export function GlobalHeader() {
   const { cart } = useCart();
   const { setSearchQuery } = useSearch();
+  const { user, isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleSearch = (query: string) => {
@@ -47,11 +49,20 @@ export function GlobalHeader() {
             <div className="max-w-md">
               <SearchBar onSearch={handleSearch} />
             </div>
-            <Link href="/login">
-              <Button variant="outline" size="sm">
-                Login
-              </Button>
-            </Link>
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700">Olá, {user?.name}</span>
+                <Button variant="outline" size="sm" onClick={logout}>
+                  Sair
+                </Button>
+              </div>
+            ) : (
+              <Link href="/login">
+                <Button variant="outline" size="sm">
+                  Login
+                </Button>
+              </Link>
+            )}
             <Link href="/cart" className="relative">
               <Button variant="outline" size="sm">
                 <ShoppingCart className="h-4 w-4" />

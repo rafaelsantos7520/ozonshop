@@ -6,16 +6,26 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
 import { useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const { login, isLoading } = useAuth();
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempt with:', { email, password });
-    // Implementar lógica de autenticação mock ou real aqui
-    alert('Login simulado! Email: ' + email + ', Senha: ' + password);
+    setError('');
+    
+    const success = await login(email, password);
+    if (success) {
+      router.push('/'); // Redirecionar para home após login
+    } else {
+      setError('Email ou senha inválidos. Tente: admin@test.com / 123456');
+    }
   };
 
   return (
@@ -49,8 +59,17 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
-            <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white">
-              Entrar
+            {error && (
+              <div className="text-red-600 text-sm text-center">
+                {error}
+              </div>
+            )}
+            <Button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
             <div className="text-center text-sm text-gray-600">
               Não tem uma conta? {' '}

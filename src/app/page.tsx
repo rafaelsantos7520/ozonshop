@@ -1,15 +1,15 @@
 import { BannerCarousel } from '@/components/BannerCarousel';
 import { ProductCarousel } from '@/components/ProductCarousel';
 import { PromoBanner } from '@/components/PromoBanner';
-import { api } from '@/lib/api';
+import { apiFetch } from '@/lib/apiFetch';
 import { getAllCategories } from '@/services/category/categoryService';
 import Link from 'next/link';
 
 export default async function Home() {
 
-  const apiData = await api.get('/')
-  const {data} = apiData.data
-  const categories = await getAllCategories();
+  const apiData = await apiFetch.get<any>('/', 3600) 
+  const data = apiData.data
+  const categories = await getAllCategories(3600);
 
 
   return (
@@ -39,27 +39,7 @@ export default async function Home() {
         </div>
       </div>
 
-      {/* Search and Filter Section
-      <section className="py-8 bg-white">
-        <div className="container mx-auto px-4">
-        </div>
-      </section> */}
-
-      {/* Display Filtered Products or Default Sections */}
-        {/* <section id="filtered-products" className="py-16 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">
-              Resultados da Busca
-            </h2>
-              <ProductGrid products={filteredProducts} />
-            ) : (
-              <p className="text-center text-gray-600 text-lg">Nenhum produto encontrado.</p>
-          </div>
-        </section>
-      ) : ( */
-      }
         <section id="default-sections" className="py-16  px-0">
-
 
           {/* Carrossel de Perfumaria */}
             <ProductCarousel 

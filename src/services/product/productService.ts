@@ -1,18 +1,19 @@
-import { api } from "@/lib/api";
+import { apiFetch } from "@/lib/apiFetch";
 
-export async function getProductBySlug(slug: string) {
-  const response = await api.get(`/products/${slug}`);
-  return response.data.data;
+// Service genérico - recebe cache como parâmetro opcional
+export async function getProductBySlug(slug: string, revalidate?: number) {
+  const response = await apiFetch.get<any>(`/products/${slug}`, revalidate);
+  return response.data;
 }
 
-export async function getAllProducts() {
-  const response = await api.get('/products');
-  return response.data.data;
+export async function getAllProducts(revalidate?: number) {
+  const response = await apiFetch.get<any>('/products', revalidate);
+  return response.data;
 }
 
-export async function getProductsByCategory(categorySlug: string) {
-  const response = await api.get(`api/v1/products/category/${categorySlug}`);
-  return response.data.data;
+export async function getProductsByCategory(categorySlug: string, revalidate?: number) {
+  const response = await apiFetch.get<any>(`/api/v1/products/category/${categorySlug}`, revalidate);
+  return response.data;
 }
 
 export async function searchProducts(q: string, category?: number, min_price?: number, max_price?: number, sort?: string) {
@@ -24,6 +25,7 @@ export async function searchProducts(q: string, category?: number, min_price?: n
   if (max_price) params.append('max_price', max_price.toString());
   if (sort) params.append('sort', sort);
   
-  const response = await api.get(`api/v1/products/search?${params.toString()}`);
-  return response.data.data;
+  // Busca nunca é cacheada (sempre fresh)
+  const response = await apiFetch.get<any>(`/api/v1/products/search?${params.toString()}`);
+  return response.data;
 }

@@ -4,6 +4,7 @@ import "./globals.css";
 import { GlobalHeader } from "@/components/GlobalHeader";
 import { CartProvider } from "@/context/CartContext";
 import { SearchProvider } from "@/context/SearchContext";
+import { AuthProvider } from "@/context/AuthContext";
 import { QueryProvider } from "@/components/QueryProvider";
 import { Footer } from "@/components/Footer";
 
@@ -32,15 +33,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SearchProvider>
-          <CartProvider>
-            <GlobalHeader />
-            <QueryProvider>
-              {children}
-              <Footer />
-            </QueryProvider>
-          </CartProvider>
-        </SearchProvider>
+        <AuthProvider>
+          <SearchProvider>
+            <CartProvider>
+              <GlobalHeader />
+              <QueryProvider>
+                {children}
+                <Footer />
+              </QueryProvider>
+            </CartProvider>
+          </SearchProvider>
+        </AuthProvider>
       </body>
     </html>
   );

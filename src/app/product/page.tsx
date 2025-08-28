@@ -81,7 +81,7 @@ function ProductPageContent() {
           Resultados da pesquisa
         </h1>
         <p className="text-gray-600">
-          Você pesquisou por: <span className="font-semibold">"{searchTerm}"</span>
+          Você pesquisou por: <span className="font-semibold">&quot;{searchTerm}&quot;</span>
         </p>
         <p className="text-sm text-gray-500 mt-1">
           {products.length} produto(s) encontrado(s)

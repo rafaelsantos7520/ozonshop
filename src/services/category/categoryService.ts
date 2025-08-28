@@ -1,22 +1,22 @@
-import { api } from "@/lib/api";
+import { apiFetch } from "@/lib/apiFetch";
 
-export async function getCategoryById(id: string) {
-  const response = await api.get(`/api/v1/categories/${id}`);
+export async function getCategoryById(id: string, revalidate?: number) {
+  const response = await apiFetch.get<any>(`/api/v1/categories/${id}`, revalidate);
   return response.data;
 }
 
-export async function getAllCategories() {
-  const response = await api.get('/api/v1/categories');
+export async function getAllCategories(revalidate?: number) {
+  const response = await apiFetch.get<any>('/api/v1/categories', revalidate);
+  return response.data
+}
+
+export async function getSubcategoriesByCategory(categorySlug: string, revalidate?: number) {
+  const response = await apiFetch.get<any>(`/api/v1/categories/${categorySlug}/subcategories`, revalidate);
   return response.data.data;
 }
 
-export async function getSubcategoriesByCategory(categorySlug: string) {
-  const response = await api.get(`/api/v1/categories/${categorySlug}/subcategories`);
-  return response.data.data;
-}
-
-export async function getCategoriesWithProducts() {
-  const response = await api.get('/api/v1/categories/with-products');
+export async function getCategoriesWithProducts(revalidate?: number) {
+  const response = await apiFetch.get<any>('/api/v1/categories/with-products', revalidate);
   return response.data;
 }
 

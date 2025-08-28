@@ -6,14 +6,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Trash2 } from 'lucide-react';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity } = useCart();
 
-  const total = cart.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
+  const total = cart.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * item.quantity, 0);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <ProtectedRoute>
+      <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">Seu Carrinho</h1>
 
       {cart.length === 0 ? (
@@ -29,13 +31,13 @@ export default function CartPage() {
             {cart.map(item => (
               <Card key={item.id} className="flex items-center p-4">
                 <div className="relative w-24 h-24 flex-shrink-0 mr-4">
-                  {item.image_path && (
-                    <Image src={item.image_path} alt={item.name} fill className="object-contain" />
+                  {item.image && (
+                    <Image src={item.image} alt={item.name} fill className="object-contain" />
                   )}
                 </div>
                 <div className="flex-grow">
                   <h2 className="text-lg font-semibold text-gray-800">{item.name}</h2>
-                  <p className="text-gray-600">R$ {(item.price || 0).toFixed(2).replace('.', ',')}</p>
+                  <p className="text-gray-600">R$ {(parseFloat(item.price) || 0).toFixed(2).replace('.', ',')}</p>
                   <div className="flex items-center mt-2">
                     <Button
                       variant="outline"
@@ -63,7 +65,7 @@ export default function CartPage() {
                   </div>
                 </div>
                 <div className="text-lg font-bold text-gray-900">
-                  R$ {((item.price || 0) * item.quantity).toFixed(2).replace('.', ',')}
+                  R$ {((parseFloat(item.price) || 0) * item.quantity).toFixed(2).replace('.', ',')}
                 </div>
               </Card>
             ))}
@@ -85,6 +87,7 @@ export default function CartPage() {
           </Card>
         </div>
       )}
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

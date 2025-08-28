@@ -4,7 +4,7 @@ import { getProductBySlug, getProductsByCategory } from '@/services/product/prod
 import { ProductCarousel } from '@/components/ProductCarousel';
 
 interface ProductPageProps {
-  params: Promise<{
+  params: Promise<{ 
     slug: string;
   }>;
 }
@@ -12,15 +12,15 @@ interface ProductPageProps {
 export default async function ProductPage({ params }: ProductPageProps) {
   const resolvedParams = await params;
   const productSlug = resolvedParams.slug;
-  const productResponse = await getProductBySlug(productSlug); 
-  const relatioendProducts = await getProductsByCategory(productResponse.category.slug);
+  const productResponse = await getProductBySlug(productSlug, 3600); 
+  const relatedProducts = await getProductsByCategory(productResponse.category.slug, 3600);
 
   return (
     <div className="min-h-screen">
       <ProductLanding product={productResponse} />
       <div className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <ProductCarousel title="Produtos Relacionados" products={relatioendProducts.products} />
+            <ProductCarousel title="Produtos Relacionados" products={relatedProducts.products} />
         </div>
       </div>
     </div>
