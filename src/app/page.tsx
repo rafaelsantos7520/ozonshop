@@ -1,10 +1,9 @@
-import { ProductGrid } from '@/components/ProductGrid';
 import { BannerCarousel } from '@/components/BannerCarousel';
 import { ProductCarousel } from '@/components/ProductCarousel';
 import { PromoBanner } from '@/components/PromoBanner';
-import { Button } from '@/components/ui/button';
 import { api } from '@/lib/api';
 import { getAllCategories } from '@/services/category/categoryService';
+import Link from 'next/link';
 
 export default async function Home() {
 
@@ -23,19 +22,19 @@ export default async function Home() {
       <PromoBanner  infoBoxes={data.info_boxes} />
 
 
-      <div>
+      <div className="my-12">
         <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
           Categorias
         </h2>
         <div className="flex flex-wrap justify-center gap-2 mb-8">
-          {categories.map((category) => (
-            <Button
+          {categories.map((category:any) => (
+            <Link
               key={category.id}
-              variant="outline"
-              className="rounded-full"
+              href={`/product/category/${category.slug}`}
+              className="rounded-lg px-4 py-2  border text-white bg-teal-500"
             >
               {category.name}
-            </Button>
+            </Link>
           ))}
         </div>
       </div>
@@ -59,7 +58,7 @@ export default async function Home() {
         </section>
       ) : ( */
       }
-        <section id="default-sections" className="py-16 bg-white">
+        <section id="default-sections" className="py-16  px-0">
 
 
           {/* Carrossel de Perfumaria */}

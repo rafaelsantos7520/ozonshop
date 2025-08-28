@@ -25,20 +25,21 @@ export function ProductCarousel({
   if (products.length === 0) return null;
 
   return (
-    <section className={`py-8`}>
-      <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">{title}</h2>
+    <section className={`my-8`}>
+      <div className="container mx-auto px-0 md:px-4">
+        <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-4 text-center">{title}</h2>
         
         <Carousel
           opts={{
-            align: "start",
             loop: true,
+            align:'end'
+
           }}
           className="w-full max-w-7xl mx-auto"
         >
-          <CarouselContent className="-ml-2 md:-ml-4 py-4">
+          <CarouselContent className=" py-4">
             {products.map((product) => (
-              <CarouselItem key={product.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
+              <CarouselItem key={product.id} className=" md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
                 <ProductCard product={product} />
               </CarouselItem>
             ))}
