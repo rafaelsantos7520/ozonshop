@@ -12,11 +12,13 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="group w-full max-w-sm mx-auto">
+      <Link href={`/product/${product.slug}`} passHref>
       <Card className="p-0 rounded-md transition-all duration-300 border border-gray-100 overflow-hidden h-[280px] md:h-[480px] flex flex-col">
           <div className="relative h-40 md:h-64 bg-gray-50 overflow-hidden">
             {product.image && (
               <Image
-                src={product.image}
+                // src={product.image}
+                src={'/images/sof1.webp'}
                 alt={product.name}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -57,12 +59,13 @@ export function ProductCard({ product }: ProductCardProps) {
                )}
              </div>
       
-               <Link className="bg-teal-500 hover:bg-teal-600 text-white rounded-full px-3 py-1 md:px-6 md:py-2 text-[10px] md:text-sm font-medium w-full md:w-auto text-center" href={`/product/${product.slug}`}>
+               <span className="bg-teal-500 hover:bg-teal-600 text-white rounded-full px-3 py-1 md:px-6 md:py-2 text-[10px] md:text-sm font-medium w-full md:w-auto text-center">
                  comprar
-               </Link>
+               </span>
            </div>
          </div>
       </Card>
+      </Link>
     </div>
   );
 }

@@ -35,7 +35,7 @@ export function ProductCarousel({
             loop: true,
             align:'end'
           }}
-          plugins={[Autoplay({ delay: 3000, stopOnInteraction: false })]}
+          plugins={[Autoplay({ delay: 7000, stopOnInteraction: false })]}
           className="w-full max-w-7xl mx-auto"
         >
           <CarouselContent className=" py-4">
