@@ -38,7 +38,7 @@ export default function ProductLanding({ product }: ProductLandingProps) {
     : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+    <div className="min-h-screen ">
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-8 lg:py-16">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">

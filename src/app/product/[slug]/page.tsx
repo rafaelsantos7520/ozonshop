@@ -18,7 +18,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   return (
     <div className="min-h-screen">
       <ProductLanding product={productResponse} />
-      <div className="py-16 bg-gray-50">
+      <div className="py-16 ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <ProductCarousel title="Produtos Relacionados" products={relatedProducts.products} />
         </div>

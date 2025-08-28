@@ -21,24 +21,6 @@ export default async function Home() {
 
       <PromoBanner  infoBoxes={data.info_boxes} />
 
-
-      <div className="my-12">
-        <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-          Categorias
-        </h2>
-        <div className="flex flex-wrap justify-center gap-2 mb-8">
-          {categories.map((category:any) => (
-            <Link
-              key={category.id}
-              href={`/product/category/${category.slug}`}
-              className="rounded-lg px-4 py-2  border text-white bg-teal-500"
-            >
-              {category.name}
-            </Link>
-          ))}
-        </div>
-      </div>
-
         <section id="default-sections" className="py-16  px-0">
 
           {/* Carrossel de Perfumaria */}
