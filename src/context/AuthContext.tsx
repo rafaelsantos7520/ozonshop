@@ -1,123 +1,100 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { logoutAction } from '@/app/actions/auth';
 
-interface User {
-  id: number;
+export interface User {
+  id: string;
   name: string;
   email: string;
-  avatar?: string;
+  phone: string | null;
+  address: string | null;
+  is_admin: boolean;
+  email_verified_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
-  register: (name: string, email: string, password: string) => Promise<boolean>;
+  refreshUser: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export function AuthProvider({ 
+  children, 
+  initialUser 
+}: { 
+  children: ReactNode;
+  initialUser?: User | null;
+}) {
+  const [user, setUser] = useState<User | null>(initialUser || null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const isAuthenticated = !!user;
 
-  // Simular verificação de token ao carregar a aplicação
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('auth_token');
-      const userData = localStorage.getItem('user_data');
+    const checkUserData = () => {
+      const cookies = document.cookie.split(';');
+      const userDataCookie = cookies.find(cookie => 
+        cookie.trim().startsWith('user-data=')
+      );
       
-      if (token && userData) {
+      if (userDataCookie) {
         try {
+          const userData = decodeURIComponent(
+            userDataCookie.split('=')[1]
+          );
           const parsedUser = JSON.parse(userData);
           setUser(parsedUser);
         } catch (error) {
           console.error('Erro ao parsear dados do usuário:', error);
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('user_data');
         }
       }
-      setIsLoading(false);
     };
 
-    checkAuth();
-  }, []);
-
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (email === 'admin@test.com' && password === '123456') {
-        const userData: User = {
-          id: 1,
-          name: 'Administrador',
-          email: email,
-          avatar: undefined
-        };
-        
-        setUser(userData);
-        localStorage.setItem('auth_token', 'fake_jwt_token_123');
-        localStorage.setItem('user_data', JSON.stringify(userData));
-        setIsLoading(false);
-        return true;
-      } else {
-        setIsLoading(false);
-        return false;
-      }
-    } catch (error) {
-      console.error('Erro no login:', error);
-      setIsLoading(false);
-      return false;
+    if (!initialUser) {
+      checkUserData();
     }
-  };
+  }, [initialUser]);
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    
-    try {
-      // Simular chamada de API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simular registro bem-sucedido
-      const userData: User = {
-        id: Date.now(), // ID temporário
-        name: name,
-        email: email,
-        avatar: undefined
-      };
-      
-      setUser(userData);
-      localStorage.setItem('auth_token', 'fake_jwt_token_' + Date.now());
-      localStorage.setItem('user_data', JSON.stringify(userData));
-      setIsLoading(false);
-      return true;
-    } catch (error) {
-      console.error('Erro no registro:', error);
-      setIsLoading(false);
-      return false;
-    }
-  };
-
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_data');
+    await logoutAction();
+  };
+
+  const refreshUser = () => {
+    const cookies = document.cookie.split(';');
+    const userDataCookie = cookies.find(cookie => 
+      cookie.trim().startsWith('user-data=')
+    );
+    
+    if (userDataCookie) {
+      try {
+        const userData = decodeURIComponent(
+          userDataCookie.split('=')[1]
+        );
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error('Erro ao atualizar dados do usuário:', error);
+        setUser(null);
+      }
+    } else {
+      setUser(null);
+    }
   };
 
   const value: AuthContextType = {
     user,
     isAuthenticated,
     isLoading,
-    login,
     logout,
-    register
+    refreshUser
   };
 
   return (
@@ -135,4 +112,4 @@ export function useAuth() {
   return context;
 }
 
-export type { User, AuthContextType };
+export type { AuthContextType };

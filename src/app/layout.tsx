@@ -29,21 +29,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <SearchProvider>
-            <CartProvider>
-              <GlobalHeader />
-              <QueryProvider>
+        <QueryProvider>
+          <AuthProvider initialUser={null}>
+            <SearchProvider>
+              <CartProvider>
+                <GlobalHeader />
                 {children}
                 <Footer />
-              </QueryProvider>
-            </CartProvider>
-          </SearchProvider>
-        </AuthProvider>
+              </CartProvider>
+            </SearchProvider>
+          </AuthProvider>
+        </QueryProvider>
       </body>
     </html>
   );

@@ -116,19 +116,36 @@ export function GlobalHeader() {
                 Home
               </Link>
               <Link 
-                href="/product" 
+                href="/products" 
                 className="text-gray-600 hover:text-gray-900 transition-colors py-2"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Produtos
               </Link>
-              <Link 
-                href="/login" 
-                className="text-gray-600 hover:text-gray-900 transition-colors py-2"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Login
-              </Link>
+              {isAuthenticated ? (
+                <div className="flex flex-col space-y-2">
+                  <span className="text-sm text-gray-700 py-2">Olá, {user?.name}</span>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => {
+                      logout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="self-start"
+                  >
+                    Sair
+                  </Button>
+                </div>
+              ) : (
+                <Link 
+                  href="/login" 
+                  className="text-gray-600 hover:text-gray-900 transition-colors py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Login
+                </Link>
+              )}
             </nav>
           </div>
         )}

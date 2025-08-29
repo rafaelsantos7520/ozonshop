@@ -1,32 +1,63 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
+import { loginAction } from '@/app/actions/auth';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Eye, EyeOff } from 'lucide-react';
+
+const loginSchema = z.object({
+  email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),
+  password: z.string(),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const { login, isLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { refreshUser } = useAuth();
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  async function onSubmit(data: LoginFormData) {
+    setIsLoading(true);
     setError('');
     
-    const success = await login(email, password);
-    if (success) {
-      router.push('/'); // Redirecionar para home após login
-    } else {
-      setError('Email ou senha inválidos. Tente: admin@test.com / 123456');
+    const formData = new FormData();
+    formData.append('email', data.email);
+    formData.append('password', data.password);
+    
+    const result = await loginAction(formData);
+    
+    if (result.success) {
+      // Atualizar o estado do usuário no contexto
+      refreshUser();
+      const redirectTo = searchParams.get('redirect') || '/';
+      router.push(redirectTo);
+    } else if (result.error) {
+      setError(result.error);
     }
-  };
+    
+    setIsLoading(false);
+  }
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-80px)] bg-gray-50">
@@ -36,48 +67,65 @@ export default function LoginPage() {
           <p className="text-gray-600">Entre na sua conta para continuar</p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div>
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="seu@email.com"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...register('email')}
               />
+              {errors.email && (
+                <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="password">Senha</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="********"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-            {error && (
-              <div className="text-red-600 text-sm text-center">
-                {error}
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="********"
+                  {...register('password')}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-400" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-400" />
+                  )}
+                </button>
               </div>
-            )}
+              {errors.password && (
+                <p className="text-sm text-red-600 mt-1">{errors.password.message}</p>
+              )}
+            </div>
+          
             <Button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white"
+              className="w-full text-white"
               disabled={isLoading}
             >
               {isLoading ? 'Entrando...' : 'Entrar'}
             </Button>
-            <div className="text-center text-sm text-gray-600">
-              Não tem uma conta? {' '}
-              <Link href="#" className="text-blue-600 hover:underline">
-                Cadastre-se
-              </Link>
-            </div>
           </form>
+          <div className="text-center text-sm text-gray-600 mt-6">
+            Não tem uma conta? {' '}
+            <Link href="/signup" className="text-blue-600 hover:underline">
+              Cadastre-se
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>
