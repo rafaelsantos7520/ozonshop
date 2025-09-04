@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "react-toastify/dist/ReactToastify.css";
 import { GlobalHeader } from "@/components/GlobalHeader";
 import { CartProvider } from "@/context/CartContext";
 import { SearchProvider } from "@/context/SearchContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { QueryProvider } from "@/components/QueryProvider";
 import { Footer } from "@/components/Footer";
+import { ToastContainer } from "react-toastify";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,8 +40,22 @@ export default function RootLayout({
             <SearchProvider>
               <CartProvider>
                 <GlobalHeader />
-                {children}
+                <div className="">
+                  {children}
+                </div>
                 <Footer />
+                <ToastContainer
+                  position="top-right"
+                  autoClose={3000}
+                  hideProgressBar={false}
+                  newestOnTop={false}
+                  closeOnClick
+                  rtl={false}
+                  pauseOnFocusLoss
+                  draggable
+                  pauseOnHover
+                  theme="light"
+                />
               </CartProvider>
             </SearchProvider>
           </AuthProvider>

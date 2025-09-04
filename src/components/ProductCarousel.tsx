@@ -26,28 +26,31 @@ export function ProductCarousel({
   if (products.length === 0) return null;
 
   return (
-    <section className={`my-8`}>
-      <div className="container mx-auto px-0 md:px-4">
-        <h2 className="text-xl md:text-3xl font-bold text-gray-900 mb-4 text-center">{title}</h2>
+    <section className="py-4">
+      <div className="max-w-5xl mx-auto px-3">
+        <h2 className="text-lg md:text-xl font-semibold text-gray-900 mb-3 text-center">{title}</h2>
         
-        <Carousel
-          opts={{
-            loop: true,
-            align:'end'
-          }}
-          plugins={[Autoplay({ delay: 7000, stopOnInteraction: false })]}
-          className="w-full max-w-7xl mx-auto"
-        >
-          <CarouselContent className=" py-4">
-            {products.map((product) => (
-              <CarouselItem key={product.id} className=" md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
-                <ProductCard product={product} />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="hidden md:flex cursor-pointer" />
-          <CarouselNext className="hidden md:flex cursor-pointer" />
-        </Carousel>
+        <div className="relative">
+          <Carousel
+            opts={{
+              loop: true,
+              align: 'start',
+              slidesToScroll: 1
+            }}
+            plugins={[Autoplay({ delay: 7000, stopOnInteraction: false })]}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-1">
+              {products.map((product) => (
+                <CarouselItem key={product.id} className="pl-1 basis-1/2 md:basis-1/3 lg:basis-1/4">
+                  <ProductCard product={product} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="absolute -left-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full border-0 bg-white/95 shadow-sm hover:bg-white hover:shadow-md transition-all duration-200 z-10" />
+            <CarouselNext className="absolute -right-3 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full border-0 bg-white/95 shadow-sm hover:bg-white hover:shadow-md transition-all duration-200 z-10" />
+          </Carousel>
+        </div>
       </div>
     </section>
   );

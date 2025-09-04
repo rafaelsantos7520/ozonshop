@@ -20,7 +20,6 @@ export function ProtectedRoute({ children, redirectTo = '/login' }: ProtectedRou
     }
   }, [isAuthenticated, isLoading, router, redirectTo]);
 
-  // Mostrar loading enquanto verifica autenticação
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -29,12 +28,10 @@ export function ProtectedRoute({ children, redirectTo = '/login' }: ProtectedRou
     );
   }
 
-  // Se não estiver autenticado, não renderizar nada (redirecionamento já foi feito)
   if (!isAuthenticated) {
     return null;
   }
 
-  // Se estiver autenticado, renderizar o conteúdo
   return <>{children}</>;
 }
 

@@ -7,6 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ShoppingCart, Award, Shield, Star, Package, Palette, Ruler, Weight } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+import { AddToCartModal } from '@/components/AddToCartModal';
+import { LoginRequiredModal } from '@/components/LoginRequiredModal';
 import Image from 'next/image';
 
 interface ProductLandingProps {
@@ -16,10 +19,31 @@ interface ProductLandingProps {
 export default function ProductLanding({ product }: ProductLandingProps) {
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(product.image);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { addToCart } = useCart();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
 
-  const handleAddToCart = () => {
-    addToCart(product as IProduct, quantity);
+  const handleAddToCart = async () => {
+    if (!isAuthenticated && !authLoading) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    if (authLoading) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await addToCart(product as IProduct, quantity);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Erro ao adicionar produto ao carrinho:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -38,9 +62,9 @@ export default function ProductLanding({ product }: ProductLandingProps) {
     : 0;
 
   return (
-    <div className="min-h-screen ">
+    <div className="py-8 md:pt-16">
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-8 lg:py-16">
+      <section className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
           {/* Product Images */}
           <div className="space-y-4">
@@ -161,8 +185,8 @@ export default function ProductLanding({ product }: ProductLandingProps) {
 
               <Button
                 onClick={handleAddToCart}
+                isLoading={isLoading}
                 disabled={product.stock === 0}
-                className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white py-6 text-lg font-semibold disabled:opacity-50"
                 size="lg"
               >
                 <ShoppingCart className="w-5 h-5 mr-2" />
@@ -184,87 +208,19 @@ export default function ProductLanding({ product }: ProductLandingProps) {
         </div>
       </section>
 
-      {/* Product Details Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Specifications */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="w-5 h-5" />
-                Especificações Técnicas
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <Weight className="w-4 h-4 text-gray-500" />
-                  <div>
-                    <p className="text-sm text-gray-500">Peso</p>
-                    <p className="font-medium">{product.weight}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Ruler className="w-4 h-4 text-gray-500" />
-                  <div>
-                    <p className="text-sm text-gray-500">Dimensões</p>
-                    <p className="font-medium">{product.dimensions}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Palette className="w-4 h-4 text-gray-500" />
-                  <div>
-                    <p className="text-sm text-gray-500">Cores</p>
-                    <p className="font-medium">{product.color}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Package className="w-4 h-4 text-gray-500" />
-                  <div>
-                    <p className="text-sm text-gray-500">Material</p>
-                    <p className="font-medium">{product.material}</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Reviews */}
-          {product.reviews && product.reviews.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Star className="w-5 h-5" />
-                  Avaliações dos Clientes
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {product.reviews.slice(0, 3).map((review) => (
-                    <div key={review.id} className="border-b pb-4 last:border-b-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{review.user.name}</span>
-                          <div className="flex">{renderStars(review.rating)}</div>
-                        </div>
-                        <span className="text-sm text-gray-500">
-                          {new Date(review.created_at).toLocaleDateString('pt-BR')}
-                        </span>
-                      </div>
-                      <p className="text-gray-600">{review.comment}</p>
-                    </div>
-                  ))}
-                  {product.reviews.length > 3 && (
-                    <p className="text-sm text-gray-500 text-center">
-                      E mais {product.reviews.length - 3} avaliações...
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </section>
+      {/* Modal de Adicionar ao Carrinho */}
+      <AddToCartModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        product={product}
+        quantity={quantity}
+      />
+      
+      {/* Modal de Login Necessário */}
+      <LoginRequiredModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </div>
   );
 }

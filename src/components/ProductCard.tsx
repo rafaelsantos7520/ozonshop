@@ -1,71 +1,163 @@
+'use client';
+
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Eye, ShoppingCart } from 'lucide-react';
 import { ProductCardProps } from '@/types/components';
-import { Heart } from 'lucide-react'
+import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+import { IProduct } from '@/types/product';
+import { AddToCartModal } from '@/components/AddToCartModal';
+import { LoginRequiredModal } from '@/components/LoginRequiredModal';
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { addToCart } = useCart();  
+  const { isAuthenticated, } = useAuth();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [isHovered, setIsHovered] = useState(false);
   const originalPrice = product.price ? Number(product.price) * 1.5 : 0;
   const discount = 32;
 
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!isAuthenticated) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await addToCart(product as IProduct, 1);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Erro ao adicionar produto ao carrinho:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
   return (
-    <div className="group w-full max-w-sm mx-auto">
-      <Link href={`/product/${product.slug}`} passHref>
-      <Card className="p-0 rounded-md transition-all duration-300 border border-gray-100 overflow-hidden h-[280px] md:h-[480px] flex flex-col">
-          <div className="relative h-40 md:h-64 bg-gray-50 overflow-hidden">
-            {product.image && (
+    <div className="w-full">
+      <Card 
+        className="p-0 gap-1  border-0 shadow-none transition-all duration-300 overflow-hidden flex flex-col cursor-pointer"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div className="relative h-[170px] md:h-[280px] bg-gray-50 overflow-hidden">
+          <Link href={`/product/${product.slug}`}>
+            <Image
+              src={"/images/sof2.webp"}
+              alt={product.name}
+              fill
+              className={`rounded-t-xl object-cover transition-all duration-700 ease-in-out ${
+                isHovered && product.secondary_image ? 'opacity-0' : 'opacity-100'
+              }`}
+            />
+          </Link>
+
+          {/* Imagem secundária */}
+          {product.secondary_image && (
+            <Link href={`/product/${product.slug}`}>
               <Image
-                // src={product.image}
-                src={'/images/sof1.webp'}
+                src={"/images/sof1.webp"}
                 alt={product.name}
                 fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                className={`rounded-t-xl object-cover transition-all duration-700 ease-in-out ${
+                  isHovered ? 'opacity-100' : 'opacity-0'
+                }`}
               />
-            )}
-   
-         </div>
+            </Link>
+          )}  
+                   
+          {/* Botões no desktop - hover sobre a imagem */}
+          <div className={`hidden md:flex absolute bottom-3 left-3 right-3 items-center justify-center gap-2 transition-all duration-500 ease-out ${
+            isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+          }`}>
+            <Link
+              href={`/product/${product.slug}`}
+              className="py-1.5 px-3 flex items-center justify-center rounded-lg bg-white/95 text-gray-700 border border-gray-200 hover:bg-white hover:text-gray-900 transition-all duration-200 backdrop-blur-sm text-sm font-medium"
+            >
+              <Eye className="w-4 h-4 mr-1.5" />
+              <span>Ver mais</span>
+            </Link>
+            <Button
+              size="sm"
+              variant="outline"
+              className="py-1.5 px-3 rounded-lg bg-white/95 text-gray-700 border-gray-200 hover:bg-white hover:text-gray-900 transition-all duration-200 backdrop-blur-sm text-sm font-medium"
+              onClick={handleAddToCart}
+            >
+              <ShoppingCart className="w-4 h-4 mr-1.5" />
+              <span>Carrinho</span>
+            </Button>
+          </div>
+        </div>
         
-        <div className="px-3 py-2 flex-1 flex flex-col">
-           <div className="space-y-1 md:space-y-2 flex-1">
-             <div className="flex items-center justify-start">
-               {product.category && (
-                 <Badge variant="secondary" className="bg-gray-100 text-gray-700 text-xs px-2 py-1">
-                   {product.category.name}
-                 </Badge>
-               )}
-             </div>
+        {/* Botões no mobile - apenas ícones */}
+        <div className="md:hidden px-2 py-1.5 flex items-center justify-center gap-2">
+          <Link
+            href={`/product/${product.slug}`}
+            className="p-1.5 flex items-center justify-center rounded-lg bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 transition-all duration-200"
+          >
+            <Eye className="w-4 h-4" />
+          </Link>
+          <Button
+            size="sm"
+            variant="outline"
+            className="p-1.5 rounded-lg  transition-all duration-200"
+            onClick={handleAddToCart}
+          >
+            <ShoppingCart className="w-4 h-4" />
+          </Button>
+        </div>
+        
+        <Link href={`/product/${product.slug}`} className="flex-1 flex flex-col">
+          <div className="px-2 py-1.5 md:px-3 md:py-2 flex-1 flex flex-col">
+            <h3 className="text-xs md:text-sm font-medium text-gray-900 line-clamp-2 leading-tight mb-1">
+              {product.name}
+            </h3>
             
-             <h3 className="text-xs md:text-lg font-semibold text-gray-900 line-clamp-1 md:line-clamp-2 leading-tight h-4 md:h-auto">
-               {product.name}
-             </h3>
-           </div>
-           
-           <div className="flex flex-col md:flex-row items-start md:items-end justify-between mt-auto mb-2 md:mb-4 space-y-2 md:space-y-0">
-             <div className="flex flex-col">
-               {product.price && (
-                 <>
-                   <span className="text-sm md:text-xl font-bold text-gray-900">
-                     {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(product.price))}
-                   </span>
-                   <div className="flex items-center space-x-1">
-                     <span className="text-[10px] md:text-xs text-gray-500 line-through">
-                       {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(originalPrice)}
-                     </span>
-                     <span className="text-[10px] md:text-xs font-medium text-green-600">{discount}% OFF</span>
-                   </div>
-                 </>
-               )}
-             </div>
-      
-               <span className="bg-teal-500 hover:bg-teal-600 text-white rounded-full px-3 py-1 md:px-6 md:py-2 text-[10px] md:text-sm font-medium w-full md:w-auto text-center">
-                 comprar
-               </span>
-           </div>
-         </div>
+            <div className="flex flex-col items-start justify-start mt-auto">
+              <div className="flex flex-col space-y-0.5">
+                {product.price && (
+                  <>
+                    <span className="text-sm md:text-base font-bold text-gray-900">
+                      {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(product.price))}
+                    </span>
+                    <div className="flex items-center space-x-1">
+                      <small className="text-xs text-gray-500 line-through">
+                        {Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(originalPrice)}
+                      </small>
+                      <span className="text-xs text-green-600 font-medium">-{discount}%</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </Link>
       </Card>
-      </Link>
+      
+      {/* Modais */}
+      <AddToCartModal 
+         isOpen={isModalOpen}
+         onClose={() => setIsModalOpen(false)}
+         product={product}
+         quantity={1}
+       />
+      
+      <LoginRequiredModal 
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
     </div>
   );
 }

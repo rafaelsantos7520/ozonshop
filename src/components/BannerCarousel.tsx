@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 
 export interface Slide {
@@ -24,6 +22,8 @@ interface BannerCarouselProps {
   autoPlay?: boolean;
   autoPlayInterval?: number;
 }
+
+
 
 export function BannerCarousel({ 
   slides, 
@@ -58,16 +58,16 @@ export function BannerCarousel({
   if (slides.length === 0) return null;
 
   return (
-    <div className="relative w-full h-48 md:h-64 lg:h-[500px] overflow-hidden rounded-lg shadow-lg">
+    <div className="relative  h-[600px] overflow-hidden  shadow-lg">
     
       <div 
         className="flex transition-transform duration-500 ease-in-out h-full"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {slides.map((slide, index) => (
-          <div key={index} className="w-full h-full flex-shrink-0 relative">
+          <div key={index} className="w-full  flex-shrink-0 relative">
             <Image
-              src={'/images/carrosel/baner1.webp'}
+              src={slide.image}
               alt={`Banner ${index + 1}`}
               fill
               className=""

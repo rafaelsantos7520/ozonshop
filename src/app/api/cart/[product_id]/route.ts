@@ -3,54 +3,11 @@ import { cookies } from 'next/headers'
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000'
 
-// GET /api/cart - Buscar carrinho
-export async function GET() {
-  try {
-    // Pega o token do cookie httpOnly
-    const cookieStore = await cookies()
-    const authToken = cookieStore.get('auth-token')?.value
-
-    if (!authToken) {
-      return NextResponse.json(
-        { error: 'Token de autenticação não encontrado' },
-        { status: 401 }
-      )
-    }
-
-    // Faz a requisição para o backend Laravel
-    const response = await fetch(`${BACKEND_URL}/api/v1/cart`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${authToken}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    })
-
-    if (!response.ok) {
-      const errorData = await response.text()
-      console.error('Erro do backend:', errorData)
-      return NextResponse.json(
-        { error: 'Erro ao buscar carrinho' },
-        { status: response.status }
-      )
-    }
-
-    const cartData = await response.json()
-    const cartItems = cartData.data?.items || []
-    return NextResponse.json(cartItems)
-
-  } catch (error) {
-    console.error('Erro na API Route do carrinho:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
-  }
-}
-
-// DELETE /api/cart - Limpar carrinho
-export async function DELETE() {
+// PATCH /api/cart/{product_id} - Atualizar quantidade de produto no carrinho
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ product_id: string }> }
+) {
   try {
     const cookieStore = await cookies()
     const authToken = cookieStore.get('auth-token')?.value
@@ -62,21 +19,40 @@ export async function DELETE() {
       )
     }
 
-    // Faz a requisição para o backend Laravel
-    const response = await fetch(`${BACKEND_URL}/api/v1/cart`, {
-      method: 'DELETE',
+    const { product_id } = await params
+
+    if (!product_id) {
+      return NextResponse.json(
+        { error: 'product_id é obrigatório' },
+        { status: 400 }
+      )
+    }
+
+    const body = await request.json()
+    const { quantity } = body
+
+    if (quantity === undefined || quantity < 0) {
+      return NextResponse.json(
+        { error: 'Quantidade deve ser um número válido' },
+        { status: 400 }
+      )
+    }
+
+    const response = await fetch(`${BACKEND_URL}/api/v1/cart/${product_id}`, {
+      method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${authToken}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json'
-      }
+      },
+      body: JSON.stringify({ quantity })
     })
 
     if (!response.ok) {
       const errorData = await response.text()
       console.error('Erro do backend:', errorData)
       return NextResponse.json(
-        { error: 'Erro ao limpar carrinho' },
+        { error: 'Erro ao atualizar quantidade do item' },
         { status: response.status }
       )
     }
@@ -93,8 +69,11 @@ export async function DELETE() {
   }
 }
 
-// POST /api/cart - Adicionar item ao carrinho
-export async function POST(request: NextRequest) {
+// DELETE /api/cart/{product_id} - Remover produto do carrinho
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ product_id: string }> }
+) {
   try {
     const cookieStore = await cookies()
     const authToken = cookieStore.get('auth-token')?.value
@@ -106,30 +85,35 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const body = await request.json()
+    const { product_id } = await params
+
+    if (!product_id) {
+      return NextResponse.json(
+        { error: 'product_id é obrigatório' },
+        { status: 400 }
+      )
+    }
 
     // Faz a requisição para o backend Laravel
-    const response = await fetch(`${BACKEND_URL}/api/v1/cart`, {
-      method: 'POST',
+    const response = await fetch(`${BACKEND_URL}/api/v1/cart/${product_id}`, {
+      method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${authToken}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json'
-      },
-      body: JSON.stringify(body)
+      }
     })
 
     if (!response.ok) {
       const errorData = await response.text()
       console.error('Erro do backend:', errorData)
       return NextResponse.json(
-        { error: 'Erro ao adicionar item ao carrinho' },
+        { error: 'Erro ao remover produto do carrinho' },
         { status: response.status }
       )
     }
 
     const cartData = await response.json()
-    // Para POST, retorna a resposta completa pois pode conter mensagens de sucesso
     return NextResponse.json(cartData)
 
   } catch (error) {

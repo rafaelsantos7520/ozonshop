@@ -1,5 +1,4 @@
 import { cookies } from 'next/headers'
-import { apiFetch } from '@/lib/apiFetch'
 
 export interface User {
   id: string
@@ -37,20 +36,24 @@ export async function getUser(): Promise<User | null> {
   
   try {
     // Buscar dados atualizados do usuário no backend
-    const response = await apiFetch.get<{
-      success: boolean
-      data: User
-      message: string
-    }>('/api/v1/auth/user')
+    const response = await fetch(`${process.env.BACKEND_URL || 'http://localhost:8000'}/api/v1/auth/user`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
     
-    if (!response.success) {
+    if (!response.ok) {
       // Se a resposta não foi bem-sucedida, limpar o token inválido
       cookieStore.delete('auth-token')
       cookieStore.delete('user-data')
       return null
     }
-    
-    return response.data
+
+    const data = await response.json()
+    return data.data
   } catch (error) {
     console.error('Erro ao buscar dados do usuário:', error)
     // Em caso de erro, limpar tokens potencialmente inválidos
@@ -76,12 +79,16 @@ export async function getAuthToken(): Promise<string | null> {
  */
 export async function validateToken(token: string): Promise<boolean> {
   try {
-    const response = await apiFetch.get<{
-      success: boolean
-      message: string
-    }>('/api/v1/auth/validate')
+    const response = await fetch(`${process.env.BACKEND_URL || 'http://localhost:8000'}/api/v1/auth/validate`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    })
     
-    return response.success
+    return response.ok
   } catch (error) {
     console.error('Erro ao validar token:', error)
     return false

@@ -1,7 +1,8 @@
 'use client';
 
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { logoutAction } from '@/app/actions/auth';
+import { logoutAction, getUserAction, getUserFromCookieAction } from '@/app/actions/auth';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export interface User {
   id: string;
@@ -20,7 +21,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   logout: () => void;
-  refreshUser: () => void;
+  refreshUser: () => Promise<void>;
+  refetchUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,9 +35,34 @@ export function AuthProvider({
   initialUser?: User | null;
 }) {
   const [user, setUser] = useState<User | null>(initialUser || null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   const isAuthenticated = !!user;
+
+  const fetchUserFromAPI = async (): Promise<User | null> => {
+    try {
+      const userData = await getUserAction();
+      
+      if (!userData) {
+        setUser(null);
+        return null;
+      }
+
+      return userData;
+    } catch (error) {
+      console.error('Erro ao buscar dados do usuário:', error);
+      return null;
+    }
+  };
+
+  const { data: apiUser, refetch: refetchUserQuery } = useQuery({
+    queryKey: ['user'],
+    queryFn: fetchUserFromAPI,
+    enabled: false, 
+    staleTime: 5 * 60 * 1000, 
+    gcTime: 10 * 60 * 1000,
+  });
 
   useEffect(() => {
     const checkUserData = () => {
@@ -43,8 +70,11 @@ export function AuthProvider({
       const userDataCookie = cookies.find(cookie => 
         cookie.trim().startsWith('user-data=')
       );
+      const authTokenCookie = cookies.find(cookie => 
+        cookie.trim().startsWith('auth-token=')
+      );
       
-      if (userDataCookie) {
+      if (userDataCookie && authTokenCookie) {
         try {
           const userData = decodeURIComponent(
             userDataCookie.split('=')[1]
@@ -53,39 +83,52 @@ export function AuthProvider({
           setUser(parsedUser);
         } catch (error) {
           console.error('Erro ao parsear dados do usuário:', error);
+          setUser(null);
         }
+      } else {
+        setUser(null);
       }
+      setIsLoading(false);
     };
 
     if (!initialUser) {
       checkUserData();
+    } else {
+      setIsLoading(false);
     }
   }, [initialUser]);
 
+  useEffect(() => {
+    if (apiUser) {
+      setUser(apiUser);
+    }
+  }, [apiUser]);
+
   const logout = async () => {
     setUser(null);
+    queryClient.clear(); 
     await logoutAction();
   };
 
-  const refreshUser = () => {
-    const cookies = document.cookie.split(';');
-    const userDataCookie = cookies.find(cookie => 
-      cookie.trim().startsWith('user-data=')
-    );
-    
-    if (userDataCookie) {
-      try {
-        const userData = decodeURIComponent(
-          userDataCookie.split('=')[1]
-        );
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-      } catch (error) {
-        console.error('Erro ao atualizar dados do usuário:', error);
-        setUser(null);
-      }
-    } else {
+  const refreshUser = async () => {
+    try {
+      const userData = await getUserFromCookieAction();
+      setUser(userData);
+    } catch (error) {
+      console.error('Erro ao atualizar dados do usuário:', error);
       setUser(null);
+    }
+  };
+
+  // Função para buscar dados atualizados do backend
+  const refetchUser = async () => {
+    try {
+      const result = await refetchUserQuery();
+      if (result.data) {
+        setUser(result.data);
+      }
+    } catch (error) {
+      console.error('Erro ao recarregar dados do usuário:', error);
     }
   };
 
@@ -94,7 +137,8 @@ export function AuthProvider({
     isAuthenticated,
     isLoading,
     logout,
-    refreshUser
+    refreshUser,
+    refetchUser
   };
 
   return (

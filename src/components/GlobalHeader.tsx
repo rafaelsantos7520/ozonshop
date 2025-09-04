@@ -39,16 +39,14 @@ export function GlobalHeader() {
             <Link href="/" className="text-gray-700 hover:text-teal-600 transition-colors">
               Home
             </Link>
-            <Link href="/products" className="text-gray-700 hover:text-teal-600 transition-colors">
+            <Link href="/product" className="text-gray-700 hover:text-teal-600 transition-colors">
               Produtos
             </Link>
           </div>
 
           {/* Desktop Right Section - Search, Login, Cart */}
           <div className="hidden md:flex items-center space-x-4 ml-auto">
-            <div className="max-w-md">
-              <SearchBar onSearch={handleSearch} />
-            </div>
+       
             {isAuthenticated ? (
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-700">Olá, {user?.name}</span>
@@ -63,15 +61,16 @@ export function GlobalHeader() {
                 </Button>
               </Link>
             )}
-            <Link href="/cart" className="relative">
-              <Button variant="outline" size="sm">
-                <ShoppingCart className="h-4 w-4" />
-                {cart.length > 0 && (
-                  <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs bg-teal-600">
-                    {cart.length}
-                  </Badge>
-                )}
-              </Button>
+            <Link 
+              href="/cart"
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 relative"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              {cart.length > 0 && (
+                <Badge className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center text-xs bg-teal-600">
+                  {cart.length}
+                </Badge>
+              )}
             </Link>
           </div>
 

@@ -1,22 +1,50 @@
 import { BannerCarousel } from '@/components/BannerCarousel';
 import { ProductCarousel } from '@/components/ProductCarousel';
 import { PromoBanner } from '@/components/PromoBanner';
-import { apiFetch } from '@/lib/apiFetch';
-import { getAllCategories } from '@/services/category/categoryService';
-import Link from 'next/link';
+
 
 export default async function Home() {
 
-  const apiData = await apiFetch.get<any>('/', 3600) 
-  const data = apiData.data
-  const categories = await getAllCategories(3600);
+  const apiData = await fetch(`${process.env.BACKEND_URL}/`, {
+    next: { revalidate: 3600 }
+  }) 
+  const {data} = await apiData.json()
 
+  const sliders = [
+    {
+      id: 1,
+      title: 'Promoção Especial',
+      description: 'Confira nossos produtos em promoção!',
+      image: '/images/carrosel/baner1.webp',
+      link: '/promocoes',
+      button_text: 'Ver Mais',
+      button_url: '/promocoes',
+    },
+    {
+      id: 2,
+      title: 'Promoção Especial',
+      description: 'Confira nossos produtos em promoção!',
+      image: '/images/carrosel/baner2.webp',  
+      link: '/promocoes',
+      button_text: 'Ver Mais',
+      button_url: '/promocoes',
+    },
+    {
+      id: 3,
+      title: 'Promoção Especial',
+      description: 'Confira nossos produtos em promoção!',
+      image: '/images/carrosel/banner3.webp',
+      link: '/promocoes',
+      button_text: 'Ver Mais',
+      button_url: '/promocoes',
+    },
+  ]
 
   return (
-    <div className="min-h-screen pb-8 px-4" >
+    <div className="min-h-screen pb-8" >
       {/* Banner Carrossel */}
       <section className="">
-        <BannerCarousel slides={data.slides} />
+        <BannerCarousel slides={sliders} />
       </section>
 
       <PromoBanner  infoBoxes={data.info_boxes} />
@@ -64,7 +92,6 @@ export default async function Home() {
               itemsPerView={4}
               backgroundColor="white"
             />
-
         </section>
     </div>
   );
