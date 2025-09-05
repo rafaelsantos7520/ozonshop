@@ -4,6 +4,8 @@ import { IProduct } from './product';
 export interface ProductCardProps {
   product: IProduct;
   className?: string;
+  showCategory?: boolean;
+  showDescription?: boolean;
 }
 
 // Tipos para o componente ProductGrid

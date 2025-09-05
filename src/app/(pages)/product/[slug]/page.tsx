@@ -47,14 +47,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
 
   return (
-    <div className="min-h-screen">
+    <div className="container mx-auto px-4 py-2 md:py-8">
       <ProductLanding product={productResponse.data} />
       <div className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border">
             {relatedProducts && (
-              <ProductCarousel title="Produtos Relacionados" products={relatedProducts.data.products} />
+              <ProductCarousel products={relatedProducts.data.products} />
             )}
-        </div>
       </div>
     </div>
   );

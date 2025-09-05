@@ -49,10 +49,17 @@ export async function searchProducts(q: string, category?: number, min_price?: n
     if (sort) params.append('sort', sort);
     if (page) params.append('page', page.toString());
     
-    const response = await fetch(`${process.env.BACKEND_URL}/api/v1/products/search?${params.toString()}`, {
-      next: { revalidate }
-    });
-    return response.json();
+    // Backend docs: GET /search/results (no /api/v1/products prefix)
+    const url = `${process.env.BACKEND_URL}/api/v1/search/results?${params.toString()}`;
+    const response = await fetch(url, { next: { revalidate } });
+
+    if (!response.ok) {
+      const text = await response.text();
+      return { error: `Busca falhou (${response.status}). ${text?.slice(0, 200)}` };
+    }
+
+
+    return await response.json();
   } catch (error) {
     console.log(error);
     return { error: 'Erro ao buscar produtos' };

@@ -3,17 +3,18 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, ShoppingCart } from 'lucide-react';
+import {  Eye, ShoppingCart } from 'lucide-react';
 import { ProductCardProps } from '@/types/components';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { IProduct } from '@/types/product';
-import { AddToCartModal } from '@/components/AddToCartModal';
-import { LoginRequiredModal } from '@/components/LoginRequiredModal';
+import { AddToCartModal } from '@/components/modals/AddToCartModal';
+import { LoginRequiredModal } from '@/components/modals/LoginRequiredModal';
+import { Badge } from '@/components/ui/badge';
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, showCategory = false, showDescription = false }: ProductCardProps) {
   const { addToCart } = useCart();  
   const { isAuthenticated, } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -46,13 +47,14 @@ export function ProductCard({ product }: ProductCardProps) {
 
 
   return (
-    <div className="w-full">
+    <div className="min-w-[160px] md:w-full mx-auto">
       <Card 
-        className="p-0 gap-1  border-0 shadow-none transition-all duration-300 overflow-hidden flex flex-col cursor-pointer"
+        className="p-0 gap-1 shadow-none border-0  transition-all duration-300 overflow-hidden flex flex-col cursor-pointer"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="relative h-[170px] md:h-[280px] bg-gray-50 overflow-hidden">
+        <CardContent className="p-0">
+        <div className="relative h-[200px] md:h-[300px] overflow-hidden rounded-2xl">
           <Link href={`/product/${product.slug}`}>
             <Image
               src={"/images/sof2.webp"}
@@ -97,30 +99,17 @@ export function ProductCard({ product }: ProductCardProps) {
             >
               <ShoppingCart className="w-4 h-4 mr-1.5" />
               <span>Carrinho</span>
-            </Button>
+            </Button> 
           </div>
         </div>
         
-        {/* Botões no mobile - apenas ícones */}
-        <div className="md:hidden px-2 py-1.5 flex items-center justify-center gap-2">
-          <Link
-            href={`/product/${product.slug}`}
-            className="p-1.5 flex items-center justify-center rounded-lg bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 transition-all duration-200"
-          >
-            <Eye className="w-4 h-4" />
-          </Link>
-          <Button
-            size="sm"
-            variant="outline"
-            className="p-1.5 rounded-lg  transition-all duration-200"
-            onClick={handleAddToCart}
-          >
-            <ShoppingCart className="w-4 h-4" />
-          </Button>
-        </div>
+      
         
         <Link href={`/product/${product.slug}`} className="flex-1 flex flex-col">
-          <div className="px-2 py-1.5 md:px-3 md:py-2 flex-1 flex flex-col">
+        {showCategory && (
+          <Badge className="px-2 py-1 my-3  bg-white/95 text-gray-700 border border-gray-200 hover:bg-white hover:text-gray-900 transition-all duration-200 ">{product.category.name}</Badge>
+        )}
+          <div className="px-2 py-3 md:px-3 md:py-4 flex-1 flex flex-col">
             <h3 className="text-xs md:text-sm font-medium text-gray-900 line-clamp-2 leading-tight mb-1">
               {product.name}
             </h3>
@@ -144,6 +133,7 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
           </div>
         </Link>
+        </CardContent>
       </Card>
       
       {/* Modais */}

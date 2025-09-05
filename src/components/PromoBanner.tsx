@@ -6,8 +6,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 
@@ -57,7 +55,7 @@ export function PromoBanner({ infoBoxes }: PromoBannerProps) {
               align: 'start',
               loop: true,
             }}
-            plugins={[Autoplay({ delay: 4000, stopOnInteraction: false })]}
+            plugins={[Autoplay({ delay: 9000, stopOnInteraction: false })]}
             className="w-full">
             <CarouselContent>
               {infoBoxes.map((item) => (

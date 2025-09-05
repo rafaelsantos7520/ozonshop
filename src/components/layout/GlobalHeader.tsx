@@ -7,8 +7,8 @@ import { Menu, X, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useSearch } from '@/context/SearchContext';
 import { useAuth } from '@/context/AuthContext';
-import SearchBar from './SearchBar';
 import { useState } from 'react';
+import SearchBar from '../SearchBar';
 
 export function GlobalHeader() {
   const { cart } = useCart();

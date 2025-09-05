@@ -4,13 +4,14 @@ import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CartItem } from '@/components/CartItem';
-import { ConfirmationModal } from '@/components/ConfirmationModal';
+import { ConfirmationModal } from '@/components/modals/ConfirmationModal';
 import { useConfirmation } from '@/hooks/useConfirmation';
 
 import Link from 'next/link';
 import { Trash2, ShoppingCart } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Skeleton } from '@/components/ui/skeleton';
+import ButtonLink from '@/components/ui/button-link';
 
 export default function CartPage() {
   const { 
@@ -96,18 +97,17 @@ export default function CartPage() {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Lista de itens do carrinho */}
                 <div className="lg:col-span-2">
-                  <Card className="overflow-hidden">
-                    <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-b border-gray-100">
+                  <Card className="overflow-hidden border-none">
+                    <div className="px-6 py-4 ">
                       <div className="flex items-center justify-between">
                         <h2 className="text-lg font-semibold text-gray-900">
                           Itens no Carrinho ({cart.length})
                         </h2>
                         {cart.length > 1 && (
                           <Button
-                            variant="ghost"
+                            variant="destructive"
                             size="sm"
                             onClick={handleClearCart}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Limpar Tudo
@@ -146,17 +146,13 @@ export default function CartPage() {
                         </div>
                       </div>
 
-                      <div className="space-y-3">
-                        <Link href="/checkout">
-                          <Button className="w-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white py-3">
+                      <div className="flex flex-col gap-2">
+                          <ButtonLink href="/checkout" variant="outline" className="w-full bg-cyan-600 text-white hover:bg-cyan-700 hover:text-white">
                             Finalizar Compra
-                          </Button>
-                        </Link>
-                        <Link href="/">
-                          <Button variant="outline" className="w-full">
+                          </ButtonLink>
+                          <ButtonLink variant="outline" href="/product" className="w-full">
                             Continuar Comprando
-                          </Button>
-                        </Link>
+                          </ButtonLink>
                       </div>
 
                       <div className="mt-6 pt-6 border-t border-gray-100">

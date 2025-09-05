@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
-import { GlobalHeader } from "@/components/GlobalHeader";
 import { CartProvider } from "@/context/CartContext";
 import { SearchProvider } from "@/context/SearchContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { QueryProvider } from "@/components/QueryProvider";
-import { Footer } from "@/components/Footer";
+import { Footer } from "@/components/layout/Footer";
 import { ToastContainer } from "react-toastify";
+import { GlobalHeader } from "@/components/layout/GlobalHeader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

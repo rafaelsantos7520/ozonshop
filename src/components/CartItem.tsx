@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { CartItem as CartItemType } from '@/context/CartContext';
 import { useCart } from '@/context/CartContext';
-import { ConfirmationModal } from '@/components/ConfirmationModal';
+import { ConfirmationModal } from '@/components/modals/ConfirmationModal';
 import { useConfirmation } from '@/hooks/useConfirmation';
 
 interface CartItemProps {
@@ -49,7 +49,7 @@ export function CartItem({ item }: CartItemProps) {
 
   return (
     <>
-      <Card className="w-full">
+      <Card className="w-full shadow-md  border-t-1">
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
             {/* Imagem do produto */}

@@ -28,7 +28,7 @@ interface BannerCarouselProps {
 export function BannerCarousel({ 
   slides, 
   autoPlay = true, 
-  autoPlayInterval = 5000 
+  autoPlayInterval = 8000 
 }: BannerCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -58,7 +58,7 @@ export function BannerCarousel({
   if (slides.length === 0) return null;
 
   return (
-    <div className="relative  h-[600px] overflow-hidden  shadow-lg">
+    <div className="max-w-full mx-auto relative  h-[200px] lg:h-[600px] overflow-hidden  shadow-lg">
     
       <div 
         className="flex transition-transform duration-500 ease-in-out h-full"

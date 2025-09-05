@@ -41,7 +41,7 @@ export default async function Home() {
   ]
 
   return (
-    <div className="min-h-screen pb-8" >
+    <div className="container mx-auto" >
       {/* Banner Carrossel */}
       <section className="">
         <BannerCarousel slides={sliders} />
@@ -49,49 +49,54 @@ export default async function Home() {
 
       <PromoBanner  infoBoxes={data.info_boxes} />
 
-        <section id="default-sections" className="py-16  px-0">
+        <section id="default-sections" className="py-16  px-2 gap-6  flex flex-col">
 
           {/* Carrossel de Perfumaria */}
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Perfumaria</h2>
             <ProductCarousel 
               products={data.latest_products} 
-              title="Perfumaria" 
               itemsPerView={4}
-              backgroundColor="white"
             />
+          </div>
           
 
           {/* Carrossel de Suplementos */}
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Suplementos Alimentares</h2>
             <ProductCarousel 
               products={data.top_rated_products} 
-              title="Suplementos Alimentares" 
               itemsPerView={4}
-              backgroundColor="gray"
             />
+          </div>
 
           {/* Carrossel de Bem Estar */}
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Bem Estar</h2>
             <ProductCarousel 
               products={data.best_sellers} 
-              title="Bem Estar Ozonizada" 
               itemsPerView={4}
-              backgroundColor="white"
             />
+          </div>
           
 
           {/* Carrossel de Produtos Capilares */}
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Produtos Capilares</h2>
             <ProductCarousel 
               products={data.top_rated_products}
-              title="Capilar Ozonizada" 
               itemsPerView={4}
-              backgroundColor="gray"
             />
+          </div>
 
           {/* Carrossel de Acessórios */}
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Acessórios</h2>
             <ProductCarousel 
               products={data.top_rated_products} 
-              title="Acessórios" 
               itemsPerView={4}
-              backgroundColor="white"
             />
+          </div>
         </section>
     </div>
   );

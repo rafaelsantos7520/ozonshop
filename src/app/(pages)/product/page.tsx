@@ -69,7 +69,7 @@ export default async function ProductPage({ searchParams }: ProductPageProps) {
     }>
       <ProductsPageClient 
         categories={categories?.data || []}
-        initialProducts={products} 
+        initialProducts={products.data} 
         searchParams={resolvedSearchParams}
       />
     </Suspense>

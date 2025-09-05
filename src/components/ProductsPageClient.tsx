@@ -1,29 +1,31 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ProductGrid } from '@/components/ProductGrid';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ICategory, IProduct } from '@/types/product';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious, PaginationEllipsis } from './ui/pagination';
+import { Label } from './ui/label';
 
 type ProductsResponse = {
   data?: {
     items: IProduct[];
-    pagination?: {
-      current_page: number;
-      last_page: number;
-      per_page: number;
-      total: number;
-      from: number;
-      to: number;
-      next_page_url: string | null;
-      prev_page_url: string | null;
-    };
+  };
+  pagination?: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number;
+    to: number;
+    next_page_url: string | null;
+    prev_page_url: string | null;
   };
   products?: IProduct[];
   items?: IProduct[];
@@ -47,6 +49,7 @@ type ProductsPageClientProps = {
 export function ProductsPageClient({ initialProducts, searchParams, categories }: ProductsPageClientProps) {
   const router = useRouter();
   const currentSearchParams = useSearchParams();
+  const filtersWrapperRef = useRef<HTMLDivElement>(null);
   
   const [searchTerm, setSearchTerm] = useState(searchParams.search || '');
   const [category, setCategory] = useState(searchParams.category || 'all');
@@ -58,7 +61,8 @@ export function ProductsPageClient({ initialProducts, searchParams, categories }
   const hasActiveFilters = !!(searchParams.search || searchParams.category || searchParams.min_price || searchParams.max_price || searchParams.sort);
   
   const products = initialProducts.data?.items || initialProducts.products || initialProducts.items || [];
-  const pagination = initialProducts.data?.pagination;
+  const pagination = initialProducts.pagination;
+
 
   const handleSearch = (page?: number) => {
     const params = new URLSearchParams();
@@ -119,6 +123,8 @@ export function ProductsPageClient({ initialProducts, searchParams, categories }
     handleSearch(page);
   };
 
+  console.log(pagination);
+
   const goToPreviousPage = () => {
     if (pagination && pagination.current_page > 1) {
       handleSearch(pagination.current_page - 1);
@@ -131,113 +137,143 @@ export function ProductsPageClient({ initialProducts, searchParams, categories }
     }
   };
 
+  // Compute which pages to show: always first & last, plus up to 3 middle pages near current
+  const middleRange = React.useMemo(() => {
+    if (!pagination) return { start: 0, end: 0 };
+    const { current_page, last_page } = pagination;
+    if (last_page <= 5) return { start: 2, end: last_page - 1 };
+    let start = Math.max(2, current_page - 1);
+    let end = Math.min(last_page - 1, current_page + 1);
+    // ensure we have up to 3 pages in the middle
+    while (end - start + 1 < 3 && start > 2) start--;
+    while (end - start + 1 < 3 && end < last_page - 1) end++;
+    return { start, end };
+  }, [pagination]);
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Barra de busca */}
       <div className="mb-6">
-        <div className="flex gap-2 mb-4">
-          <div className="flex-1 relative">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-2 mb-4 items-center">
+          {/* Campo de busca */}
+          <div className="md:col-span-8 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
               type="text"
               placeholder="Buscar produtos..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="pl-10"
+              onKeyUp={handleKeyPress}
+              className="pl-10 h-10 w-full"
             />
           </div>
-          <Button onClick={() => handleSearch()} className="px-6">
-            Buscar
-          </Button>
-          <Button 
-            variant="outline" 
-            onClick={() => setShowFilters(!showFilters)}
-            className="px-4"
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            Filtros
-          </Button>
+
+
+            
+          {/* Ações: Buscar + Filtros */}
+          <div className="md:col-span-4 flex flex-col md:flex-row  md:justify-end gap-2">
+            <Button onClick={() => handleSearch()} className="h-10 px-5 w-full md:w-auto">
+              Buscar
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setShowFilters(!showFilters)}
+              className="h-10 px-4 w-full md:w-auto"
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              Filtros
+            </Button>
+          </div>
         </div>
 
-        {/* Filtros expandidos */}
-        {showFilters && (
-          <Card className="mb-4">
-            <CardContent className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Categoria
-                  </label>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Todas" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todas</SelectItem>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.id.toString()}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+        {/* Filtros expandidos com animação suave */}
+        <div
+          className={`mb-4 transition-all duration-500 ease-in-out overflow-hidden ${showFilters ? 'opacity-100' : 'opacity-0'}`}
+          aria-hidden={!showFilters}
+          style={{ maxHeight: showFilters ? (filtersWrapperRef.current?.scrollHeight ?? 0) : 0 }}
+        >
+          <div ref={filtersWrapperRef}>
+            <Card>
+              <CardContent className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                  {/* Categoria */}
+                  <div className="w-full">
+                    <Label htmlFor="category" className="mb-1 block">Categoria</Label>
+                    <Select value={category} onValueChange={setCategory}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Selecionar categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>Categorias</SelectLabel>
+                          <SelectItem value="all">Todas</SelectItem>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id.toString()}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Preço mínimo */}
+                  <div className="w-full">
+                    <Label htmlFor="min-price" className="mb-1 block">Preço mínimo</Label>
+                    <Input
+                      id="min-price"
+                      type="number"
+                      placeholder="0"
+                      value={minPrice}
+                      onChange={(e) => setMinPrice(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Preço máximo */}
+                  <div className="w-full">
+                    <Label htmlFor="max-price" className="mb-1 block">Preço máximo</Label>
+                    <Input
+                      id="max-price"
+                      type="number"
+                      placeholder="1000"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+
+                  {/* Ordenação */}
+                  <div className="w-full">
+                    <Label htmlFor="sort" className="mb-1 block">Ordenar por</Label>
+                    <Select value={sort} onValueChange={setSort}>
+                      <SelectTrigger id="sort" className="w-full">
+                        <SelectValue placeholder="Relevância" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="relevance">Relevância</SelectItem>
+                        <SelectItem value="price_low">Menor preço</SelectItem>
+                        <SelectItem value="price_high">Maior preço</SelectItem>
+                        <SelectItem value="name_asc">Nome A-Z</SelectItem>
+                        <SelectItem value="name_desc">Nome Z-A</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Ações */}
+                  <div className="w-full flex gap-2 md:justify-end">
+                    <Button onClick={() => handleSearch()} className="w-full md:w-auto">
+                      Aplicar Filtros
+                    </Button>
+                    <Button variant="outline" onClick={clearFilters} className="w-full md:w-auto">
+                      Limpar
+                    </Button>
+                  </div>
                 </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Preço mínimo
-                  </label>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    value={minPrice}
-                    onChange={(e) => setMinPrice(e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Preço máximo
-                  </label>
-                  <Input
-                    type="number"
-                    placeholder="1000"
-                    value={maxPrice}
-                    onChange={(e) => setMaxPrice(e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Ordenar por
-                  </label>
-                  <Select value={sort} onValueChange={setSort}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Relevância" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="relevance">Relevância</SelectItem>
-                      <SelectItem value="price_asc">Menor preço</SelectItem>
-                      <SelectItem value="price_desc">Maior preço</SelectItem>
-                      <SelectItem value="name_asc">Nome A-Z</SelectItem>
-                      <SelectItem value="name_desc">Nome Z-A</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="flex gap-2 mt-4">
-                <Button onClick={() => handleSearch()} className="flex-1">
-                  Aplicar Filtros
-                </Button>
-                <Button variant="outline" onClick={clearFilters}>
-                  Limpar
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
         {/* Filtros ativos */}
         {hasActiveFilters && (
@@ -288,10 +324,9 @@ export function ProductsPageClient({ initialProducts, searchParams, categories }
               </Badge>
             )}
             <Button 
-              variant="ghost" 
+              variant="destructive" 
               size="sm" 
               onClick={clearFilters}
-              className="text-red-600 hover:text-red-700"
             >
               Limpar todos
             </Button>
@@ -311,86 +346,106 @@ export function ProductsPageClient({ initialProducts, searchParams, categories }
 
       {/* Grid de produtos */}
       <ProductGrid products={products} />
-      
-      {/* Paginação */}
+
       {pagination && pagination.last_page > 1 && (
-        <div className="mt-8 flex items-center justify-center space-x-2">
-          <Button
-             variant="outline"
-             size="sm"
-             onClick={goToPreviousPage}
-             disabled={pagination.current_page === 1}
-             className="flex items-center gap-1"
-           >
-             <ChevronLeft className="h-4 w-4" />
-             Anterior
-           </Button>
-          
-          <div className="flex items-center space-x-1">
-            {/* Primeira página */}
-            {pagination.current_page > 3 && (
-              <>
-                <Button
-                   variant={1 === pagination.current_page ? "default" : "outline"}
-                   size="sm"
-                   onClick={() => goToPage(1)}
-                 >
-                   1
-                 </Button>
-                {pagination.current_page > 4 && (
-                  <span className="px-2 text-gray-500">...</span>
-                )}
-              </>
+        <Pagination>
+          <PaginationContent>
+            {/* Previous */}
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                aria-disabled={pagination.current_page === 1}
+                className={pagination.current_page === 1 ? 'pointer-events-none opacity-50' : ''}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (pagination.current_page === 1) return;
+                  goToPreviousPage();
+                }}
+              />
+              
+            </PaginationItem>
+
+            {/* First page */}
+            <PaginationItem>
+              <PaginationLink
+                href="#"
+                isActive={pagination.current_page === 1}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (pagination.current_page !== 1) goToPage(1);
+                }}
+              >
+                1
+              </PaginationLink>
+            </PaginationItem>
+
+            {/* Left ellipsis */}
+            {pagination.last_page > 5 && middleRange.start > 2 && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
             )}
-            
-            {/* Páginas ao redor da atual */}
-            {Array.from({ length: Math.min(5, pagination.last_page) }, (_, i) => {
-              const startPage = Math.max(1, Math.min(pagination.current_page - 2, pagination.last_page - 4));
-              const pageNumber = startPage + i;
-              
-              if (pageNumber > pagination.last_page) return null;
-              
+
+            {/* Middle pages */}
+            {pagination.last_page > 1 && Array.from({ length: Math.max(0, middleRange.end - middleRange.start + 1) }).map((_, idx) => {
+              const page = middleRange.start + idx;
+              if (page <= 1 || page >= pagination.last_page) return null;
               return (
-                <Button
-                   key={pageNumber}
-                   variant={pageNumber === pagination.current_page ? "default" : "outline"}
-                   size="sm"
-                   onClick={() => goToPage(pageNumber)}
-                 >
-                   {pageNumber}
-                 </Button>
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    href="#"
+                    isActive={pagination.current_page === page}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (pagination.current_page !== page) goToPage(page);
+                    }}
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
               );
             })}
-            
-            {/* Última página */}
-            {pagination.current_page < pagination.last_page - 2 && (
-              <>
-                {pagination.current_page < pagination.last_page - 3 && (
-                  <span className="px-2 text-gray-500">...</span>
-                )}
-                <Button
-                   variant={pagination.last_page === pagination.current_page ? "default" : "outline"}
-                   size="sm"
-                   onClick={() => goToPage(pagination.last_page)}
-                 >
-                   {pagination.last_page}
-                 </Button>
-              </>
+
+            {/* Right ellipsis */}
+            {pagination.last_page > 5 && middleRange.end < pagination.last_page - 1 && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
             )}
-          </div>
-          
-          <Button
-             variant="outline"
-             size="sm"
-             onClick={goToNextPage}
-             disabled={pagination.current_page === pagination.last_page}
-             className="flex items-center gap-1"
-           >
-             Próxima
-             <ChevronRight className="h-4 w-4" />
-           </Button>
-        </div>
+
+            {/* Last page */}
+            {pagination.last_page > 1 && (
+              <PaginationItem>
+                <PaginationLink
+                  href="#"
+                  isActive={pagination.current_page === pagination.last_page}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (pagination.current_page !== pagination.last_page) goToPage(pagination.last_page);
+                  }}
+                >
+                  {pagination.last_page}
+                </PaginationLink>
+              </PaginationItem>
+            )}
+
+            {/* Next */}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                aria-disabled={pagination.current_page === pagination.last_page}
+                className={pagination.current_page === pagination.last_page ? 'pointer-events-none opacity-50' : ''}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (pagination.current_page === pagination.last_page) return;
+                  goToNextPage();
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
+      
     </div>
   );
 }

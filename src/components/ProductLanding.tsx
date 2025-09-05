@@ -8,8 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ShoppingCart, Award, Shield, Star, Package, Palette, Ruler, Weight } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { AddToCartModal } from '@/components/AddToCartModal';
-import { LoginRequiredModal } from '@/components/LoginRequiredModal';
+import { AddToCartModal } from '@/components/modals/AddToCartModal';
+import { LoginRequiredModal } from '@/components/modals/LoginRequiredModal';
 import Image from 'next/image';
 
 interface ProductLandingProps {
